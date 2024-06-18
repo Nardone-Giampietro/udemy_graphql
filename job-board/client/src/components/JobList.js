@@ -18,7 +18,7 @@ function JobItem({ job }) {
   return (
     <li className="media">
       <div className="media-left has-text-grey">
-        {formatDate(job.date)}
+        {job.date}
       </div>
       <div className="media-content">
         <Link to={`/jobs/${job.id}`}>
