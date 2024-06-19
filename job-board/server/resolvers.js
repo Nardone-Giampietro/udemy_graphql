@@ -1,4 +1,4 @@
-import { getJobs, getJob, getJobsByCompany } from "./db/jobs.js";
+import {getJobs, getJob, getJobsByCompany, createJob, deleteJob, updateJob} from "./db/jobs.js";
 import { getCompany } from "./db/companies.js";
 import {GraphQLError} from 'graphql';
 
@@ -31,6 +31,24 @@ export const resolvers = {
             }
             return company;
         },
+    },
+    Mutation: {
+        createJob: async (_root, { input }) => {
+            const job = await createJob({
+                companyId: "FjcJCHJALA4i", // TODO set based on user
+                title: input.title,
+                description: input.description,
+            });
+            return job;
+        },
+        deleteJob: async (_root, { input: {id} }) => {
+            const job = await deleteJob(id);
+            return job;
+        },
+        updateJob: async (_root, { input: {id, title, description} }) => {
+            const job = await updateJob({id, title, description});
+            return job;
+        }
     },
     Job: {
         date: (job) => toLocaleDate(job.createdAt),
