@@ -1,6 +1,7 @@
 import {getJobs, getJob, getJobsByCompany, createJob, deleteJob, updateJob} from "./db/jobs.js";
 import { getCompany } from "./db/companies.js";
 import {GraphQLError} from 'graphql';
+import {getUser} from "./db/users.js";
 
 export const resolvers = {
     Query: {
@@ -33,20 +34,25 @@ export const resolvers = {
         },
     },
     Mutation: {
-        createJob: async (_root, { input }) => {
+        createJob: async (_root, { input }, {user}) => {
+            if (!user){noValidToken();}
             const job = await createJob({
-                companyId: "FjcJCHJALA4i", // TODO set based on user
+                companyId: user.companyId,
                 title: input.title,
                 description: input.description,
             });
             return job;
         },
-        deleteJob: async (_root, { input: {id} }) => {
-            const job = await deleteJob(id);
+        deleteJob: async (_root, { input: {id} }, {user}) => {
+            if (!user){noValidToken();}
+            const job = await deleteJob(id, user.companyId);
+            if (!job){notFound("Job not found");}
             return job;
         },
-        updateJob: async (_root, { input: {id, title, description} }) => {
-            const job = await updateJob({id, title, description});
+        updateJob: async (_root, { input: {id, title, description} }, {user}) => {
+            if (!user){noValidToken();}
+            const job = await updateJob({id, title, description, companyId: user.companyId});
+            if (!job){notFound("Job not found");}
             return job;
         }
     },
@@ -58,6 +64,22 @@ export const resolvers = {
         jobs: (company) => getJobsByCompany(company.id)
     }
 
+}
+
+function notFound(message){
+    throw new GraphQLError(message, {
+        extensions: {
+            code: "NOT_FOUND",
+        }
+    });
+}
+
+function noValidToken(){
+    throw new GraphQLError('No valid token provided', {
+        extensions: {
+            code: "NOT_AUTHORIZED",
+        }
+    });
 }
 
 function toLocaleDate (value) {
