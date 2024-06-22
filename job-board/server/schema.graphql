@@ -1,5 +1,5 @@
 type Query {
-    jobs: [Job!]
+    jobs(limit: Int, offset: Int): JobSublist
     job(id: ID!): Job
     company(id: ID!): Company
 }
@@ -45,4 +45,9 @@ type Job {
     """
     date: String!
     company: Company!
+}
+
+type JobSublist {
+    items: [Job!]!
+    totalCount: Int!
 }
