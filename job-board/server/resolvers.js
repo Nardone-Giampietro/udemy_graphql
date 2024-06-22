@@ -1,7 +1,6 @@
 import {getJobs, getJob, getJobsByCompany, createJob, deleteJob, updateJob} from "./db/jobs.js";
-import { getCompany } from "./db/companies.js";
+import {getCompany} from "./db/companies.js";
 import {GraphQLError} from 'graphql';
-import {getUser} from "./db/users.js";
 
 export const resolvers = {
     Query: {
@@ -58,7 +57,7 @@ export const resolvers = {
     },
     Job: {
         date: (job) => toLocaleDate(job.createdAt),
-        company: (job) => getCompany(job.companyId),
+        company: (job, args, {companyLoader}) => companyLoader.load(job.companyId),
     },
     Company: {
         jobs: (company) => getJobsByCompany(company.id)
